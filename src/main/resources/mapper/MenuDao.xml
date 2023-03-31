@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liu.blog.dao.MenuDao">
+    <select id="listMenusByUserInfoId" resultType="com.liu.blog.entity.Menu">
+        SELECT DISTINCT
+        tm.id,name,path,component,icon,is_hidden,parent_id,order_num
+        from blog.tb_user_role as tur
+             join blog.tb_role_menu as rm on tur.role_id=rm.role_id
+             join blog.tb_menu as tm on rm.menu_id=tm.id
+        where
+             user_id=#{userInfoId}
+    </select>
+</mapper>

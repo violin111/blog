@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liu.blog.dao.PhotoAlbumDao">
+    <select id="listPhotoAlbumBacks" resultType="com.liu.blog.dto.PhotoAlbumBackDTO">
+         select tpa.id,album_name,album_desc,album_cover,count(pa.id) as photo_count,status
+         from
+         (
+            SELECT id,album_name,album_desc,album_cover,status
+            from blog.tb_photo_album
+            where is_delete=0
+            <if test="condition.keywords!=null">
+                and album_name like concat('%',#{condition.keywords},'%')
+            </if>
+            order by id desc
+            limit #{current},#{size}
+        ) as tpa
+      LEFT JOIN
+        (
+            select id,album_id
+            from blog.tb_photo
+            where is_delete=0
+        ) as pa
+        ON tpa.id=pa.album_id
+        group by tpa.id
+    </select>
+</mapper>

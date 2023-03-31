@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liu.blog.dao.ArticleDao">
+
+    <resultMap id="articleHomeResultMap" type="com.liu.blog.dto.ArticleHomeDTO">
+        <id column="id" property="id"/>
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="article_content" property="articleContent"/>
+        <result column="create_time" property="createTime"/>
+        <result column="type" property="type"/>
+        <result column="is_top" property="isTop"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <collection property="tagDTOList" ofType="com.liu.blog.dto.TagDTO">
+            <id column="tag_id" property="id"/>
+            <result column="tag_name" property="tagName"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="articlePreviewResultMap" type="com.liu.blog.dto.ArticlePreviewDTO">
+        <id column="id" property="id"/>
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="create_time" property="createTime"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <collection property="tagDTOList" ofType="com.liu.blog.dto.TagDTO">
+            <id column="tag_id" property="id"/>
+            <result column="tag_name" property="tagName"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="articleResultMap" type="com.liu.blog.dto.ArticleDTO">
+        <id column="id" property="id"/>
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="article_content" property="articleContent"/>
+        <result column="type" property="type"/>
+        <result column="original_url" property="originalUrl"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <collection property="tagDTOList" ofType="com.liu.blog.dto.TagDTO">
+            <id column="tag_id" property="id"/>
+            <result column="tag_name" property="tagName"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="articleBackResultMap" type="com.liu.blog.dto.ArticleBackDTO">
+        <id column="id" property="id"/>
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="create_time" property="createTime"/>
+        <result column="type" property="type"/>
+        <result column="is_top" property="isTop"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="status" property="status"/>
+        <result column="category_name" property="categoryName"/>
+        <collection property="tagDTOList" ofType="com.liu.blog.dto.TagDTO">
+            <id column="tag_id" property="id"/>
+            <result column="tag_name" property="tagName"/>
+        </collection>
+    </resultMap>
+
+    <select id="listArticles" resultMap="articleHomeResultMap">
+        select ta.id,
+               ta.article_cover,
+               ta.article_title,
+               SUBSTR(ta.article_content,1,500) as article_content,
+               ta.create_time,
+               ta.is_top,
+               ta.type,
+               ta.category_id,
+               tc.category_name,
+               tt.tag_name
+        from (
+            select id,
+                   article_title,
+                   article_cover,
+                   article_content,
+                   create_time,
+                   is_top,
+                   type,
+                   category_id
+            from blog.tb_article
+            where is_delete=0 and status =1
+            order by is_top desc,id desc
+            limit #{current},#{size}
+        ) ta
+        join blog.tb_category tc on tc.id=ta.category_id
+        join blog.tb_article_tag tat on tat.article_id=ta.id
+        join blog.tb_tag tt on tt.id=tat.tag_id
+        order by ta.is_top desc,ta.id desc
+    </select>
+
+
+    <select id="listArticleStatistics" resultType="com.liu.blog.dto.ArticleStatisticsDTO">
+        select DATE_FORMAT(create_time,'%Y-%m-%d') as date,
+               COUNT(*) as count
+        from blog.tb_article
+        group by date
+            order by date desc;
+    </select>
+
+    <select id="countArticleBacks" resultType="java.lang.Integer">
+        select count(distinct ta.id)
+        from blog.tb_article ta
+        left join blog.tb_article_tag tat on ta.id=tat.article_id
+        <where>
+            is_delete=#{condition.isDelete}
+            <if test="condition.keywords != null">
+                and article_title like concat('%',#{condition.keywords},'%')
+            </if>
+            <if test="condition.status != null">
+                and `status` = #{condition.status}
+            </if>
+            <if test="condition.categoryId != null">
+                and category_id = #{condition.categoryId}
+            </if>
+            <if test="condition.type != null">
+                and type = #{condition.type}
+            </if>
+            <if test="condition.tagId != null">
+                and tat.tag_id = #{condition.tagId}
+            </if>
+        </where>
+    </select>
+
+    <select id="listArticleBacks" resultMap="articleBackResultMap">
+        select ta.id,article_cover,article_title,type,is_top,ta.is_delete,ta.status,ta.create_time,tc.category_name,tt.id as tag_id,tt.tag_name
+        from (
+        select id,article_cover,article_title,type,is_top,is_delete,status,create_time,category_id
+        from blog.tb_article
+        <where>
+            is_delete = #{condition.isDelete}
+            <if test="condition.keywords != null">
+                and article_title like concat('%',#{condition.keywords},'%')
+            </if>
+            <if test="condition.status != null">
+                and status = #{condition.status}
+            </if>
+            <if test="condition.categoryId != null">
+                and category_id = #{condition.categoryId}
+            </if>
+            <if test="condition.type != null">
+                and type = #{condition.type}
+            </if>
+            <if test="condition.tagId != null">
+                and id in
+                (
+                SELECT
+                article_id
+                FROM
+                tb_article_tag
+                WHERE
+                tag_id = #{condition.tagId}
+                )
+            </if>
+        </where>
+        ORDER BY
+        is_top DESC,
+        id DESC
+        LIMIT #{current},#{size}
+        ) ta
+        left join blog.tb_category tc on ta.category_id=tc.id
+        left join blog.tb_article_tag tat on ta.id=tat.article_id
+        left join blog.tb_tag tt on tt.id=tat.tag_id
+        order by
+           ta.is_top desc,
+           ta.id desc
+    </select>
+</mapper>

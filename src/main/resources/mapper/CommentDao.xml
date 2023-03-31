@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liu.blog.dao.CommentDao">
+
+    <select id="listComments" resultType="com.liu.blog.dto.CommentDTO">
+        select tui.nickname,tui.avatar,tui.web_site,tc.user_id,tc.id,tc.comment_content,tc.create_time
+        from blog.tb_comment as tc
+        join blog.tb_user_info  as tui
+        on tc.user_id=tui.id
+        <where>
+            <if test="commentVO.topicId!=null">
+                topic_id=#{commentVO.topicId}
+            </if>
+            AND type = #{commentVO.type}
+            AND c.is_review = 1
+            AND parent_id IS NULL
+        </where>
+        limit #{current},#{size}
+        order by tc.id desc
+    </select>
+
+    <select id="listCommentBackDTO" resultType="com.liu.blog.dto.CommentBackDTO">
+        select tc.id,tui.avatar,tui.nickname,tur.nickname as reply_nickname,ta.article_title,tc.comment_content,tc.type,tc.create_time,tc.is_review
+        from blog.tb_comment tc
+        left join blog.tb_article ta on tc.topic_id=ta.id
+        left join blog.tb_user_info tui on tc.user_id=tui.id
+        left join blog.tb_user_info tur on tc.reply_user_id=tur.id
+        <where>
+            <if test="condition.type != null">
+                tc.type = #{condition.type}
+            </if>
+            <if test="condition.isReview != null">
+                and tc.is_review = #{condition.isReview}
+            </if>
+            <if test="condition.keywords != null">
+                and tui.nickname like concat('%',#{condition.keywords},'%')
+            </if>
+        </where>
+        order by tc.id desc
+        LIMIT #{current},#{size}
+    </select>
+
+
+    <select id="countCommentDTO" resultType="java.lang.Integer">
+        select count(1)
+        from blog.tb_comment tc
+        left join blog.tb_user_info tui
+        on tc.user_id=tui.id
+        <where>
+            <if test="condition.type != null">
+                tc.type = #{condition.type}
+            </if>
+            <if test="condition.isReview != null">
+                and tc.is_review = #{condition.isReview}
+            </if>
+            <if test="condition.keywords != null">
+                and tui.nickname like concat('%',#{condition.keywords},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

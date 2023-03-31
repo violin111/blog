@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liu.blog.dao.UniqueViewDao">
+    <select id="listUniqueViews" resultType="com.liu.blog.dto.UniqueViewDTO">
+        select DATE_FORMAT( create_time, "%Y-%m-%d" )as 'day',views_count
+        from blog.tb_unique_view as tuv
+        where create_time> #{startTime} and  create_time &lt;=  #{endTime}
+        order by create_time
+    </select>
+</mapper>

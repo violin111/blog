@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liu.blog.dao.TalkDao">
+    <select id="listBackTalks" resultType="com.liu.blog.dto.TalkBackDTO">
+        select tt.id,tui.nickname,avatar,content,images,is_top,status,tt.create_time
+        from blog.tb_talk as tt
+             inner join blog.tb_user_info as tui
+             on tt.user_id=tui.id
+        <where>
+            <if test="condition.status !=null">
+                tt.status = #{condition.status}
+            </if>
+        </where>
+
+        order by
+             tt.is_top desc,
+             tt.id desc
+        LIMIT #{current},#{size}
+    </select>
+</mapper>
