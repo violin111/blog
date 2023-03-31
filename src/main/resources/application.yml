@@ -10,9 +10,9 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/blog?serverTimezone=Asia/Shanghai&allowMultiQueries=true
-    username: root
-    password: 123123
+    url: jdbc:mysql://你的ip:3306/blog?serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    username: MYSQL用户名
+    password: MYSQL密码
     hikari:
       minimum-idle: 5
       # 空闲连接存活最大时间，默认600000（10分钟）
@@ -30,15 +30,15 @@ spring:
       connection-test-query: SELECT 1
   # redis配置
   redis:
-    host: 114.116.224.143
+    host: 你的ip
     port: 6379
-    password: 123123
+    password: Redis密码
   # mq配置
   rabbitmq:
-    host: 114.116.224.143
+    host: 你的ip
     port: 5672
-    username: guest
-    password: guest
+    username: rabbitmq用户名
+    password: rabbitmq密码
     listener:
       simple:
         retry:
@@ -48,15 +48,20 @@ spring:
   # es配置 若搜索模式为mysql可删除
   elasticsearch:
     rest:
-      uris: 47.104.143.31:9200
+      uris: 你的IP:9200
   # 邮箱配置
   mail:
     host: smtp.qq.com
-    username: 318461029@qq.com
-    password: pysdkeskpgfobjcc
+    username: 邮箱用户名
+    password: 邮箱授权码
     default-encoding: UTF-8
     port: 587
-
+    properties:
+      mail:
+      smtp:
+      auth: true
+      socketFactory:
+      class: javax.net.ssl.SSLSocketFactory
   # 上传图片大小限制
   servlet:
     multipart:
@@ -72,23 +77,23 @@ mybatis-plus:
 
 # 搜索模式 可选 elasticsearch或mysql
 search:
-  mode: elasticsearch
+  mode: mysql
 
 
 # 上传模式 可选 oss或local  （http://和最后的/一定不能去！！！）
 upload:
-  mode: oss
+  mode: local
   local:
     # nginx映射本地文件路径，无域名则为 ip:83
     url: http://你的文件上传子域名/
     # 本地文件存储路径
     path: /usr/local/upload/
   oss:
-    url: http://blog-liuxukun.oss-cn-beijing.aliyuncs.com/
-    endpoint: oss-cn-beijing.aliyuncs.com
-    accessKeyId: LTAI5tCXStJjsnZ8gBUfMADZ
-    accessKeySecret: HEvhQQhrn4wvLM4hGXBk5mB0CGsgcz
-    bucketName: blog-liuxukun
+    url: http://Bucket域名/
+    endpoint: OSS配置endpoint
+    accessKeyId: OSS配置accessKeyId
+    accessKeySecret: OSS配置accessKeySecret
+    bucketName: OSS配置bucketName
   cos:
     url: http://Bucket域名/
     secretId: cos的secretId
@@ -98,7 +103,7 @@ upload:
 
 # 网站前台域名（邮件通知用）
 website:
-  url: http://www.liuxukun.xyz
+  url: http://你的主域名或ip
 
 #第三方配置信息
 qq:
@@ -107,9 +112,9 @@ qq:
   user-info-url: https://graph.qq.com/user/get_user_info?openid={openid}&access_token={access_token}&oauth_consumer_key={oauth_consumer_key}
 
 weibo:
-  app-id: 1982681510
-  app-secret: fc9e61879e5fa8add83aadefd0b1e2f4
+  app-id: 微博APPID
+  app-secret: 微博APPSECRET
   grant-type: authorization_code
-  redirect-url: https://www.liuxukun.xyz/oauth/login/weibo
+  redirect-url: 微博回调地址
   access-token-url: https://api.weibo.com/oauth2/access_token
   user-info-url: https://api.weibo.com/2/users/show.json?uid={uid}&access_token={access_token}
